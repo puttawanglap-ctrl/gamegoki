@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ผจญภัยอาณาจักรพยัญชนะไทย 🇹🇭✨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&family=Mali:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF85A2;
+            --secondary: #70D6FF;
+            --accent: #FFD670;
+            --success: #99FFAC;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Mali', cursive;
+            background: linear-gradient(180deg, #A0E7FF 0%, #FFFFFF 100%);
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .kawaii-shadow {
+            box-shadow: 0 8px 0 rgba(0,0,0,0.1);
+        }
+
+        .btn-bounce:active {
+            transform: scale(0.95) translateY(4px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+        }
+
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .screen {
+            display: none;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 20px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .active { display: flex; }
+
+        .letter-card {
+            background: white;
+            border: 4px solid var(--primary);
+            border-radius: 25px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .letter-card:hover { transform: rotate(3deg) scale(1.05); }
+
+        .progress-bar {
+            height: 20px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #ddd;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: red;
+            animation: fall 3s linear forwards;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(360deg); }
+        }
+
+        /* Modal styling */
+        .modal-overlay {
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- UI Overlay (Fixed) -->
+    <div id="ui-overlay" class="hidden fixed top-0 left-0 w-full p-4 z-50 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <button onclick="goHome()" class="bg-white p-2 rounded-full border-2 border-pink-400 btn-bounce">🏠</button>
+            <div class="bg-white px-3 py-1 rounded-full border-2 border-pink-400 flex items-center gap-2 shadow-sm">
+                <span id="ui-stars">⭐ 0</span>
+                <span id="ui-coins">🪙 0</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="bg-white px-4 py-1 rounded-full border-2 border-blue-400 font-bold text-blue-600" id="ui-player-name">นักเรียน</div>
+            <button onclick="toggleSound()" id="sound-btn" class="bg-white p-2 rounded-full border-2 border-blue-400 btn-bounce">🔊</button>
+        </div>
+    </div>
+
+    <!-- 1. Login Screen -->
+    <div id="screen-login" class="screen active justify-center bg-[#FFD6E0]">
+        <div class="bg-white p-8 rounded-[40px] border-8 border-pink-300 w-full max-w-sm text-center shadow-2xl">
+            <h1 class="text-3xl font-bold text-pink-500 mb-2">ยินดีต้อนรับ! 🐼</h1>
+            <p class="text-gray-500 mb-6 italic">ใส่ข้อมูลเพื่อเริ่มผจญภัย</p>
+            
+            <input type="text" id="input-name" placeholder="ชื่อเล่น" class="w-full mb-3 p-4 rounded-2xl border-4 border-pink-100 outline-none focus:border-pink-300 text-center text-xl">
+            <div class="flex gap-2 mb-6">
+                <input type="text" id="input-class" placeholder="ชั้น (เช่น ป.1)" class="w-1/2 p-4 rounded-2xl border-4 border-pink-100 outline-none focus:border-pink-300 text-center">
+                <input type="number" id="input-no" placeholder="เลขที่" class="w-1/2 p-4 rounded-2xl border-4 border-pink-100 outline-none focus:border-pink-300 text-center">
+            </div>
+
+            <button onclick="startGame()" class="w-full bg-pink-400 hover:bg-pink-500 text-white text-2xl py-4 rounded-2xl font-bold kawaii-shadow btn-bounce">เข้าสู่ห้องเรียน ✨</button>
+            
+            <button onclick="showAdmin()" class="mt-8 text-xs text-gray-300">Admin Only</button>
+        </div>
+    </div>
+
+    <!-- 2. Main Menu -->
+    <div id="screen-menu" class="screen">
+        <div class="mt-20 text-center">
+            <h2 class="text-4xl font-bold text-blue-500 floating mb-2">เลือกด่านเรียนรู้ 🏰</h2>
+            <div class="grid grid-cols-2 gap-4 mt-8 max-w-md">
+                <button onclick="loadModule('thai')" class="bg-[#FF9AA2] p-6 rounded-3xl border-b-8 border-red-400 text-white font-bold text-xl btn-bounce">
+                    <div class="text-4xl mb-2">🇹🇭</div> ก-ฮ
+                </button>
+                <button onclick="loadModule('vowel')" class="bg-[#B5EAD7] p-6 rounded-3xl border-b-8 border-green-400 text-white font-bold text-xl btn-bounce">
+                    <div class="text-4xl mb-2">🌈</div> สระไทย
+                </button>
+                <button onclick="loadModule('tone')" class="bg-[#FFDAC1] p-6 rounded-3xl border-b-8 border-orange-300 text-white font-bold text-xl btn-bounce">
+                    <div class="text-4xl mb-2">✨</div> วรรณยุกต์
+                </button>
+                <button onclick="loadModule('abc')" class="bg-[#C7CEEA] p-6 rounded-3xl border-b-8 border-purple-400 text-white font-bold text-xl btn-bounce">
+                    <div class="text-4xl mb-2">🔤</div> A-Z
+                </button>
+            </div>
+            
+            <div class="mt-10 flex gap-4">
+                <button onclick="showLeaderboard()" class="bg-yellow-400 px-6 py-2 rounded-full text-white font-bold btn-bounce shadow-md">🏆 อันดับ</button>
+                <button onclick="showStickers()" class="bg-blue-400 px-6 py-2 rounded-full text-white font-bold btn-bounce shadow-md">🎁 ของสะสม</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Learning View (Consonants) -->
+    <div id="screen-game" class="screen">
+        <div class="mt-16 w-full max-w-md">
+            <div class="progress-bar mb-4">
+                <div id="game-progress" class="progress-fill"></div>
+            </div>
+            
+            <div id="question-area" class="bg-white p-6 rounded-[30px] border-4 border-pink-200 shadow-xl text-center relative">
+                <div id="mascot" class="absolute -top-12 -left-4 text-5xl floating">🐼</div>
+                <h3 id="question-text" class="text-2xl font-bold text-gray-700 mb-6">จิ้มรูปที่คู่กับตัวอักษรนี้!</h3>
+                
+                <div id="target-display" class="text-8xl font-bold text-pink-500 mb-8 p-4 bg-pink-50 rounded-2xl inline-block min-w-[120px]">ก</div>
+                
+                <div id="options-grid" class="grid grid-cols-2 gap-4">
+                    <!-- Options injected by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Result Screen -->
+    <div id="screen-result" class="screen justify-center">
+        <div class="bg-white p-10 rounded-[40px] border-8 border-yellow-300 text-center max-w-sm shadow-2xl">
+            <h1 class="text-5xl mb-4">🎉</h1>
+            <h2 class="text-3xl font-bold text-gray-800">เก่งมาก!</h2>
+            <p class="text-xl text-pink-500 mb-6" id="result-name">นักเรียนตัวน้อย</p>
+            
+            <div class="bg-yellow-50 p-6 rounded-2xl mb-8">
+                <div class="flex justify-around items-center">
+                    <div>
+                        <div class="text-3xl font-bold text-yellow-500" id="result-stars">0</div>
+                        <div class="text-sm text-gray-500">ดาวที่ได้รับ</div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-blue-500" id="result-coins">0</div>
+                        <div class="text-sm text-gray-500">เหรียญทอง</div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="goHome()" class="w-full bg-green-400 text-white text-2xl py-4 rounded-2xl font-bold btn-bounce kawaii-shadow mb-4">กลับหน้าหลัก</button>
+            <button onclick="window.location.reload()" class="text-gray-400 font-bold underline">เล่นอีกรอบ</button>
+        </div>
+    </div>
+
+    <!-- 5. Admin Panel -->
+    <div id="screen-admin" class="screen bg-gray-100 p-4">
+        <div class="bg-white w-full h-full rounded-2xl p-6 overflow-auto shadow-inner">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">📊 แผงควบคุมคุณครู</h2>
+                <button onclick="goHome()" class="text-red-500 font-bold">ปิด [X]</button>
+            </div>
+            
+            <table class="w-full text-left text-sm">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="p-2">ชื่อ</th>
+                        <th class="p-2">ชั้น</th>
+                        <th class="p-2">ดาว</th>
+                        <th class="p-2">คะแนนรวม</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-table-body">
+                    <!-- Data here -->
+                </tbody>
+            </table>
+            
+            <div class="mt-8 flex gap-2">
+                <button onclick="exportData()" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-xs">Export CSV</button>
+                <button onclick="clearData()" class="bg-red-500 text-white px-4 py-2 rounded-lg text-xs">ล้างข้อมูลทั้งหมด</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Game Logic & State ---
+        let gameState = {
+            player: { name: '', class: '', no: '', stars: 0, coins: 0, level: 1 },
+            currentModule: 'thai',
+            currentStep: 0,
+            totalSteps: 5,
+            score: 0,
+            isMuted: false
+        };
+
+        const DATA_THAI = [
+            { char: 'ก', img: '🐔', name: 'ไก่' },
+            { char: 'ข', img: '🥚', name: 'ไข่' },
+            { char: 'ค', img: '🐃', name: 'ควาย' },
+            { char: 'ง', img: '🐍', name: 'งู' },
+            { char: 'จ', img: '🍽️', name: 'จาน' },
+            { char: 'ฉ', img: '🥁', name: 'ฉิ่ง' },
+            { char: 'ช', img: '🐘', name: 'ช้าง' }
+        ];
+
+        const DATA_ABC = [
+            { char: 'A', img: '🍎', name: 'Apple' },
+            { char: 'B', img: '🐝', name: 'Bee' },
+            { char: 'C', img: '🐱', name: 'Cat' },
+            { char: 'D', img: '🐶', name: 'Dog' }
+        ];
+
+        // --- Core Functions ---
+
+        function startGame() {
+            const name = document.getElementById('input-name').value;
+            if (!name) return alert('กรุณาใส่ชื่อก่อนจ้า 😊');
+            
+            gameState.player.name = name;
+            gameState.player.class = document.getElementById('input-class').value;
+            gameState.player.no = document.getElementById('input-no').value;
+
+            document.getElementById('ui-player-name').innerText = name;
+            document.getElementById('ui-overlay').classList.remove('hidden');
+            
+            savePlayer();
+            switchScreen('screen-menu');
+        }
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function loadModule(module) {
+            gameState.currentModule = module;
+            gameState.currentStep = 0;
+            gameState.score = 0;
+            updateProgress();
+            nextQuestion();
+            switchScreen('screen-game');
+        }
+
+        function nextQuestion() {
+            if (gameState.currentStep >= gameState.totalSteps) {
+                showResults();
+                return;
+            }
+
+            const dataSet = gameState.currentModule === 'abc' ? DATA_ABC : DATA_THAI;
+            const correct = dataSet[Math.floor(Math.random() * dataSet.length)];
+            
+            document.getElementById('target-display').innerText = correct.char;
+            
+            // Generate options
+            let options = [correct];
+            while (options.length < 4) {
+                let random = dataSet[Math.floor(Math.random() * dataSet.length)];
+                if (!options.find(o => o.char === random.char)) options.push(random);
+            }
+            options.sort(() => Math.random() - 0.5);
+
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "bg-blue-50 p-6 rounded-2xl border-4 border-blue-100 hover:border-blue-400 text-4xl transition-all btn-bounce";
+                btn.innerHTML = `<div>${opt.img}</div><div class="text-sm mt-1 text-gray-500 font-bold">${opt.name}</div>`;
+                btn.onclick = () => checkAnswer(opt.char === correct.char, btn);
+                grid.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(isCorrect, btn) {
+            if (isCorrect) {
+                playSound('correct');
+                btn.classList.replace('border-blue-100', 'border-green-400');
+                btn.classList.add('bg-green-50');
+                gameState.player.stars += 1;
+                gameState.player.coins += 5;
+                gameState.score += 1;
+                createConfetti();
+                
+                setTimeout(() => {
+                    gameState.currentStep++;
+                    updateProgress();
+                    updateUI();
+                    nextQuestion();
+                }, 800);
+            } else {
+                playSound('wrong');
+                btn.classList.add('animate-shake', 'bg-red-50', 'border-red-300');
+                setTimeout(() => btn.classList.remove('bg-red-50', 'border-red-300'), 500);
+            }
+        }
+
+        function updateProgress() {
+            const percent = (gameState.currentStep / gameState.totalSteps) * 100;
+            document.getElementById('game-progress').style.width = percent + '%';
+        }
+
+        function updateUI() {
+            document.getElementById('ui-stars').innerText = '⭐ ' + gameState.player.stars;
+            document.getElementById('ui-coins').innerText = '🪙 ' + gameState.player.coins;
+        }
+
+        function showResults() {
+            document.getElementById('result-name').innerText = `${gameState.player.name} (${gameState.player.class})`;
+            document.getElementById('result-stars').innerText = gameState.score;
+            document.getElementById('result-coins').innerText = gameState.score * 5;
+            saveStats();
+            switchScreen('screen-result');
+        }
+
+        function goHome() {
+            switchScreen('screen-menu');
+        }
+
+        // --- Sound & Effects ---
+        function toggleSound() {
+            gameState.isMuted = !gameState.isMuted;
+            document.getElementById('sound-btn').innerText = gameState.isMuted ? '🔇' : '🔊';
+        }
+
+        function playSound(type) {
+            if (gameState.isMuted) return;
+            // Native synthesis for accessibility
+            const msg = new SpeechSynthesisUtterance();
+            msg.lang = 'th-TH';
+            if (type === 'correct') {
+                msg.text = 'เก่งมากจ้า';
+            } else if (type === 'wrong') {
+                msg.text = 'ลองใหม่นะ';
+            }
+            window.speechSynthesis.speak(msg);
+        }
+
+        function createConfetti() {
+            for (let i = 0; i < 20; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti';
+                c.style.left = Math.random() * 100 + 'vw';
+                c.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                c.style.animationDelay = Math.random() * 2 + 's';
+                document.body.appendChild(c);
+                setTimeout(() => c.remove(), 3000);
+            }
+        }
+
+        // --- Data Persistence ---
+        function savePlayer() {
+            localStorage.setItem('thai_quest_player', JSON.stringify(gameState.player));
+        }
+
+        function saveStats() {
+            let history = JSON.parse(localStorage.getItem('thai_quest_history') || '[]');
+            history.push({
+                ...gameState.player,
+                timestamp: new Date().toISOString(),
+                module: gameState.currentModule,
+                lastScore: gameState.score
+            });
+            localStorage.setItem('thai_quest_history', JSON.stringify(history));
+        }
+
+        // --- Admin Dash ---
+        function showAdmin() {
+            const pass = prompt('ใส่รหัสผ่านคุณครู:');
+            if (pass === 'admin1234') {
+                renderAdminTable();
+                switchScreen('screen-admin');
+            }
+        }
+
+        function renderAdminTable() {
+            const history = JSON.parse(localStorage.getItem('thai_quest_history') || '[]');
+            const tbody = document.getElementById('admin-table-body');
+            tbody.innerHTML = history.map(h => `
+                <tr class="border-b">
+                    <td class="p-2">${h.name}</td>
+                    <td class="p-2">${h.class || '-'}</td>
+                    <td class="p-2">${h.stars}</td>
+                    <td class="p-2 font-bold">${h.lastScore}/${gameState.totalSteps}</td>
+                </tr>
+            `).join('');
+        }
+
+        function clearData() {
+            if(confirm('ลบข้อมูลนักเรียนทั้งหมด?')) {
+                localStorage.clear();
+                alert('ลบเรียบร้อย');
+                window.location.reload();
+            }
+        }
+
+        function exportData() {
+            const history = localStorage.getItem('thai_quest_history') || '[]';
+            const blob = new Blob([history], {type: 'text/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'student_data.json';
+            a.click();
+        }
+
+        // Init
+        window.onload = () => {
+            console.log("🇹🇭 ผจญภัยอาณาจักรพยัญชนะไทย พร้อมสนุก!");
+            // Smooth animations for mobile safari
+            document.body.addEventListener('touchstart', () => {}, {passive: true});
+        };
+    </script>
+</body>
+</html>
